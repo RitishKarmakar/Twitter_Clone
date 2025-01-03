@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Twitter Trends</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000; /* Match the dark background */
+            color: #e0e0e0;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #1da1f2; /* Twitter blue */
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #0d8dd8;
+        }
+
+        #results {
+            margin: 20px auto;
+            width: 90%;
+            max-width: 600px;
+            text-align: left; /* Align text to the left */
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            background: #16181c; /* Dark card background */
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        li h2 {
+            font-size: 16px;
+            color: #fff;
+            margin: 0 0 5px 0;
+        }
+
+        li span {
+            font-size: 14px;
+            color: #8899a6; /* Muted text */
+        }
+
+        .info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #8899a6;
+        }
+
+        .happening-header {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .trend-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 5px;
+        }
+
+        .trend-meta span {
+            font-size: 12px;
+            color: #8899a6;
+        }
+    </style>
+    <script>
+        function fetchAndDisplay() {
+            const results = document.getElementById('results');
+            results.innerHTML = "<p>Fetching data, please wait...</p>";
+
+            fetch('/scrape_and_fetch')
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.trends && data.trends.length > 0) {
+                        results.innerHTML = `
+                            <h2 class="happening-header">What’s Happening</h2>
+                            <ul>
+                                ${data.trends.map((trend, index) => `
+                                    <li>
+                                        <h2>${trend}</h2>
+                                        <div class="trend-meta">
+                                            <span>Trending ${index + 1}</span>
+                                            <span>#${Math.floor(Math.random() * 1000)} Tweets</span>
+                                        </div>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                            <p class="info">Timestamp: ${new Date(data.timestamp).toLocaleString()}</p>
+                            <p class="info">IP Address: ${data.ip_address}</p>
+                        `;
+                    } else {
+                        results.innerHTML = "<p>No trends available at the moment. Please try again later.</p>";
+                    }
+                })
+                .catch(err => {
+                    console.error("Error fetching data:", err);
+                    results.innerHTML = "<p>Failed to fetch data. Please try again.</p>";
+                });
+        }
+    </script>
+</head>
+<body>
+    <h1>Twitter Trending Topics</h1>
+    <button onclick="fetchAndDisplay()">Click here to scrape and display trends</button>
+    <div id="results">
+        <h2 class="happening-header">What’s Happening</h2>
+        <ul id="latest-trends">
+            <!-- Placeholder for initial trends -->
+        </ul>
+        <p class="info">Timestamp: Not available</p>
+        <p class="info">IP Address: Not available</p>
+    </div>
+    <script>
+        // Fetch and display the latest 5 trends when the page loads
+        fetch('/scrape_and_fetch')
+            .then(response => response.json())
+            .then(data => {
+                const latestTrends = document.getElementById('latest-trends');
+                if (data && data.trends && data.trends.length > 0) {
+                    latestTrends.innerHTML = data.trends
+                        .map((trend, index) => `
+                            <li>
+                                <h2>${trend}</h2>
+                                <div class="trend-meta">
+                                    <span>Trending ${index + 1}</span>
+                                    <span>#${Math.floor(Math.random() * 1000)} Tweets</span>
+                                </div>
+                            </li>
+                        `).join('');
+
+                    document.querySelector(".info:nth-of-type(1)").textContent = `Timestamp: ${new Date(data.timestamp).toLocaleString()}`;
+                    document.querySelector(".info:nth-of-type(2)").textContent = `IP Address: ${data.ip_address}`;
+                } else {
+                    latestTrends.innerHTML = "<li>No trends available at the moment.</li>";
+                }
+            })
+            .catch(err => {
+                console.error("Error fetching initial trends:", err);
+                const latestTrends = document.getElementById('latest-trends');
+                latestTrends.innerHTML = "<li>Failed to load initial trends.</li>";
+            });
+    </script>
+</body>
+</html>
